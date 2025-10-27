@@ -92,7 +92,7 @@ class DolarVzlaSmart:
                 "current": curr,
                 "previous": prev,
                 "next": {"usd": None, "eur": None, "date": None},
-                "changePercentage": self.pct(curr, prev),
+                #"changePercentage": self.pct(curr, prev),
             }
         else:
             next, curr, prev = rates
@@ -100,7 +100,7 @@ class DolarVzlaSmart:
                 "current": curr,
                 "previous": prev,
                 "next": next,
-                "changePercentage": self.pct(curr, prev),
+                #"changePercentage": self.pct(curr, prev),
             }
         return out
 

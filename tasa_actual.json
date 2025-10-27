@@ -1,0 +1,21 @@
+{
+  "current": {
+    "date": "2025-10-27",
+    "usd": 216.3714,
+    "eur": 251.65508419
+  },
+  "previous": {
+    "date": "2025-10-24",
+    "usd": 214.419,
+    "eur": 249.02193822
+  },
+  "next": {
+    "usd": null,
+    "eur": null,
+    "date": null
+  },
+  "changePercentage": {
+    "usd": 0.9105536356,
+    "eur": 1.0573951792
+  }
+}

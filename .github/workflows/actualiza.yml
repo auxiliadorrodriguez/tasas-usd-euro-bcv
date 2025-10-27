@@ -2,7 +2,8 @@ name: Actualiza tasas
 
 on:
   schedule:
-    - cron: '30 20,21,22 * * *'   # ✅ 20:30, 21:30, 22:30 UTC = 4:30, 5:30, 6:30 PM 
+    - cron: '0 4,20,21,22 * * *'   # ✅ 12:00 AM, 4:30 PM, 5:30 PM, 6:30 PM VEN
+    #- cron: '30 20,21,22 * * *'   # ✅ 20:30, 21:30, 22:30 UTC = 4:30, 5:30, 6:30 PM VEN
     #- cron: '30 16,17,18 * * *'   # 16:30, 17:30, 18:30 UTC
   workflow_dispatch:            # botón manual
 

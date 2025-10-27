@@ -1,0 +1,20 @@
+name: Actualiza tasas
+
+on:
+  schedule:
+    - cron: '30 16,17,18 * * *'   # 16:30, 17:30, 18:30 UTC
+  workflow_dispatch:            # botón manual
+
+jobs:
+  actualizar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+      - run: pip install -r requirements.txt
+      - run: python tasas.py
+      - uses: stefanzweifel/git-auto-commit-action@v4
+        with:
+          commit_message: "Actualiza tasas vía GitHub Actions"

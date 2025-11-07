@@ -10,8 +10,8 @@
     "eur": 261.16227345
   },
   "next": {
-    "usd": null,
-    "eur": null,
-    "date": null
+    "date": "2025-11-08",
+    "usd": 250.00,
+    "eur": 280.00
   }
 }

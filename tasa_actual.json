@@ -10,8 +10,8 @@
     "eur": 261.16227345
   },
   "next": {
-    "date": "null",
-    "usd": "null",
-    "eur": "null"
+    "usd": null,
+    "eur": null,
+    "date": null
   }
 }

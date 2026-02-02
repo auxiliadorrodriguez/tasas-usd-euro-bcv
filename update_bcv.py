@@ -5,62 +5,64 @@ FILE = "tasa_actual.json"
 URL_BCV = "https://www.bcv.org.ve/"
 
 def get_bcv_rates():
-    """Extrae las tasas oficiales directamente de la web del BCV."""
-    headers = {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
-    }
+    """Extrae las tasas y la fecha de vigencia directamente de la web del BCV."""
+    headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'}
     try:
-        # Ignoramos verificación de SSL porque el sitio del BCV suele tener problemas de certificados
         response = requests.get(URL_BCV, headers=headers, verify=False, timeout=30)
-        response.raise_for_status()
         soup = BeautifulSoup(response.text, 'html.parser')
 
-        # Extraer Dólar
-        usd_val = soup.find('div', id='dolar').find('strong').text.strip().replace(',', '.')
-        # Extraer Euro
-        eur_val = soup.find('div', id='euro').find('strong').text.strip().replace(',', '.')
+        usd = soup.find('div', id='dolar').find('strong').text.strip().replace(',', '.')
+        eur = soup.find('div', id='euro').find('strong').text.strip().replace(',', '.')
         
-        return {
-            "usd": float(usd_val),
-            "eur": float(eur_val),
-            "date": datetime.datetime.now().strftime("%Y-%m-%d")
+        # Extraer fecha de vigencia (ej: "Viernes, 30 Enero 2026")
+        fecha_raw = soup.find('span', class_='date-display-single').text.strip()
+        
+        meses = {
+            "Enero": "01", "Febrero": "02", "Marzo": "03", "Abril": "04",
+            "Mayo": "05", "Junio": "06", "Julio": "07", "Agosto": "08",
+            "Septiembre": "09", "Octubre": "10", "Noviembre": "11", "Diciembre": "12"
         }
+        
+        partes = fecha_raw.split()
+        fecha_iso = f"{partes[3]}-{meses[partes[2]]}-{partes[1].zfill(2)}"
+        
+        return {"usd": float(usd), "eur": float(eur), "date": fecha_iso}
     except Exception as e:
-        print(f"Error extrayendo datos del BCV: {e}")
+        print(f"Error en scraping: {e}")
         return None
 
 def load():
     if not os.path.exists(FILE):
-        return {"current": None, "previous": None, "next": None}
-    try:
-        with open(FILE) as f:
-            return json.load(f)
-    except:
-        return {"current": None, "previous": None, "next": None}
+        return {"current": None, "previous": None, "next": {"usd": None, "eur": None, "date": None}}
+    with open(FILE) as f:
+        return json.load(f)
 
-# ---- Proceso Principal ----
-data_bcv = get_bcv_rates()
+# ---- Lógica Principal ----
+bcv_data = get_bcv_rates()
 
-if data_bcv:
-    old = load()
+if bcv_data:
+    data = load()
+    # Usamos la fecha actual de Venezuela (UTC-4)
+    hoy = (datetime.datetime.now(datetime.timezone.utc) - datetime.timedelta(hours=4)).date()
+    fecha_bcv = datetime.datetime.strptime(bcv_data["date"], "%Y-%m-%d").date()
+
+    # Si la fecha que publica el BCV es FUTURA respecto a hoy
+    if fecha_bcv > hoy:
+        # Solo actualizamos 'next' si es una fecha nueva
+        if data["next"]["date"] != bcv_data["date"]:
+            data["next"] = bcv_data
+            print(f"Nueva tasa 'next' detectada para el {bcv_data['date']}")
     
-    # Solo actualizamos si la fecha es distinta o no hay datos previos
-    if old["current"] is None or old["current"]["date"] != data_bcv["date"]:
-        new_entry = {
-            "date": data_bcv["date"],
-            "usd": data_bcv["usd"],
-            "eur": data_bcv["eur"]
-        }
-        
-        # Rotación de datos (Mantenemos tu estructura de la captura)
-        old["previous"] = old["current"]
-        old["current"] = new_entry
-        # Nota: 'next' suele ser una proyección, aquí la igualamos al current 
-        # o puedes dejarla como estaba si tienes otra fuente para el día siguiente.
-        old["next"] = new_entry 
-        
-        with open(FILE, "w") as f:
-            json.dump(old, f, indent=4)
-        print(f"Tasas actualizadas: USD {data_bcv['usd']}")
-    else:
-        print("La tasa para hoy ya está registrada.")
+    # Si la fecha del BCV es HOY o ya pasó (y es más reciente que nuestra current)
+    elif fecha_bcv >= hoy:
+        if data["current"] is None or bcv_data["date"] > data["current"]["date"]:
+            data["previous"] = data["current"]
+            data["current"] = bcv_data
+            # Al entrar una nueva current, limpiamos next si ya se alcanzó esa fecha
+            if data["next"]["date"] == bcv_data["date"]:
+                data["next"] = {"usd": None, "eur": None, "date": None}
+            print(f"Actualizada tasa 'current' al {bcv_data['date']}")
+
+    # Guardar cambios
+    with open(FILE, "w") as f:
+        json.dump(data, f, indent=4)

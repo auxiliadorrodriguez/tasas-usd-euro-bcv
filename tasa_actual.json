@@ -4,7 +4,11 @@
         "eur": 439.63916349,
         "date": "2026-02-03"
     },
-    "previous": null,
+   "previous": {
+        "usd": 372.1057,
+        "eur": 439.63916349,
+        "date": "2026-02-03"
+    },
     "next": {
         "usd": null,
         "eur": null,

@@ -6,13 +6,13 @@ on:
     # 4:30 PM, 5:30 PM y 6:30 PM HORA VENEZOLANA VET (20:30, 21:30, 22:30 UTC)
     # Aquí es donde el script detecta la tasa nueva y la guarda en "next"
     - cron: '30 20,21,22 * * 1-5'
-
-    # 2. ROTACIÓN DE MEDIANOCHE HORA VENEZOLANA (Martes a Sábado)
-    # 12:30 AM VET (04:30 AM UTC)
-    # Aquí el script ve que ya es "hoy" y mueve "next" a "current"
-    - cron: '30 4 * * 2-6'
+    
+   # 2. ROTACIÓN DE MEDIANOCHE (Lunes a Viernes)
+    # Mueve la tasa de "next" a "current" al empezar el día
+    # Cambiamos 2-6 por 1-5
+    - cron: '30 4 * * 1-5'
   workflow_dispatch: # Permite ejecutarlo manualmente con un botón
-
+    
 jobs:
   build:
     runs-on: ubuntu-latest
